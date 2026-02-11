@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RA/CA Scheduler - Manage Your Academic & Residential Life</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-left">
+                <div class="login-content">
+                    <h1 class="brand">RA/CA Scheduler</h1>
+                    <p class="tagline">Smart scheduling for college RAs and CAs</p>
+                    
+                    <div id="authMessage" class="message"></div>
+                    
+                    <form id="authForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required autocomplete="username">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required autocomplete="current-password">
+                        </div>
+                        
+                        <div class="auth-buttons">
+                            <button type="submit" id="loginBtn" class="btn btn-primary">Log In</button>
+                            <button type="button" id="registerBtn" class="btn btn-secondary">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="login-right">
+                <div class="feature-showcase">
+                    <div class="feature-item" style="animation-delay: 0.1s">
+                        <div class="feature-icon">📚</div>
+                        <h3>Smart Scheduling</h3>
+                        <p>Auto-generate study blocks that respect your availability and rotate between subjects</p>
+                    </div>
+                    <div class="feature-item" style="animation-delay: 0.2s">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Time Tracking</h3>
+                        <p>Learn from past assignments to estimate future work more accurately</p>
+                    </div>
+                    <div class="feature-item" style="animation-delay: 0.3s">
+                        <div class="feature-icon">🤝</div>
+                        <h3>Meeting Scheduler</h3>
+                        <p>Share your availability link for easy meeting bookings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboardPage" class="page">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1 class="brand-small">RA/CA Scheduler</h1>
+                <div class="header-right">
+                    <span id="usernameDisplay" class="username-display"></span>
+                    <button id="logoutBtn" class="btn btn-ghost">Log Out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="dashboard-content">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar">
+                <button class="nav-item active" data-view="calendar">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </button>
+                <button class="nav-item" data-view="assignments">
+                    <span class="nav-icon">✏️</span>
+                    <span>Assignments</span>
+                </button>
+                <button class="nav-item" data-view="schedule">
+                    <span class="nav-icon">🎓</span>
+                    <span>Classes</span>
+                </button>
+                <button class="nav-item" data-view="meetings">
+                    <span class="nav-icon">🤝</span>
+                    <span>Meetings</span>
+                </button>
+                <button class="nav-item" data-view="study-blocks">
+                    <span class="nav-icon">📖</span>
+                    <span>Study Blocks</span>
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </button>
+            </nav>
+
+            <!-- Main View Area -->
+            <main class="main-view">
+                <!-- Calendar View -->
+                <div id="calendarView" class="view active">
+                    <div class="view-header">
+                        <h2>Calendar</h2>
+                        <p class="view-subtitle">Your complete schedule at a glance</p>
+                    </div>
+                    <div class="calendar-container">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+
+                <!-- Assignments View -->
+                <div id="assignmentsView" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Assignments</h2>
+                            <p class="view-subtitle">Track your academic work and RA duties</p>
+                        </div>
+                        <button id="addAssignmentBtn" class="btn btn-primary">+ New Assignment</button>
+                    </div>
+                    
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="incomplete">Active</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                        <button class="filter-btn" data-filter="all">All</button>
+                    </div>
+                    
+                    <div id="assignmentsList" class="items-list"></div>
+                </div>
+
+                <!-- Classes View -->
+                <div id="scheduleView" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Class Schedule</h2>
+                            <p class="view-subtitle">Your recurring weekly classes</p>
+                        </div>
+                        <button id="addClassBtn" class="btn btn-primary">+ Add Class</button>
+                    </div>
+                    <div id="classesList" class="items-list"></div>
+                </div>
+
+                <!-- Meetings View -->
+                <div id="meetingsView" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Meetings</h2>
+                            <p class="view-subtitle">Your scheduled meetings</p>
+                        </div>
+                        <button id="addMeetingBtn" class="btn btn-primary">+ New Meeting</button>
+                    </div>
+                    
+                    <div class="meeting-link-card">
+                        <h3>📎 Your Meeting Link</h3>
+                        <p>Share this link for others to schedule meetings with you:</p>
+                        <div class="link-display">
+                            <input type="text" id="meetingLink" readonly>
+                            <button id="copyLinkBtn" class="btn btn-secondary">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div id="meetingsList" class="items-list"></div>
+                </div>
+
+                <!-- Study Blocks View -->
+                <div id="studyBlocksView" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Study Blocks</h2>
+                            <p class="view-subtitle">Auto-generated study schedule</p>
+                        </div>
+                        <button id="regenerateBtn" class="btn btn-primary">🔄 Regenerate Schedule</button>
+                    </div>
+                    <div id="studyBlocksList" class="items-list"></div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settingsView" class="view">
+                    <div class="view-header">
+                        <h2>Settings</h2>
+                        <p class="view-subtitle">Customize your scheduling preferences</p>
+                    </div>
+                    
+                    <form id="settingsForm" class="settings-form">
+                        <div class="form-group">
+                            <label for="wakeTime">Wake Time</label>
+                            <input type="time" id="wakeTime" name="wakeTime">
+                            <small>When you typically wake up</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bedTime">Bedtime</label>
+                            <input type="time" id="bedTime" name="bedTime">
+                            <small>When you typically go to bed</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="studyBlockDuration">Study Block Duration (minutes)</label>
+                            <input type="number" id="studyBlockDuration" name="studyBlockDuration" min="30" max="240" step="15">
+                            <small>Maximum length for a single study session</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Preferences</button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for Adding/Editing Items -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 id="modalTitle">Add Item</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script src="app.js"></script>
+</body>
+</html>

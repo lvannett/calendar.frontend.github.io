@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule a Meeting</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        .schedule-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+        
+        .schedule-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: 16px;
+            padding: var(--spacing-xl);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+        
+        .schedule-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .schedule-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .schedule-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .availability-grid {
+            display: grid;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .time-slot {
+            padding: var(--spacing-md);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: center;
+        }
+        
+        .time-slot:hover {
+            border-color: var(--primary);
+            background: rgba(212, 117, 78, 0.05);
+        }
+        
+        .time-slot.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .time-slot-date {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .time-slot-time {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .booking-form {
+            display: none;
+            animation: fadeInUp 0.3s var(--transition-base);
+        }
+        
+        .booking-form.active {
+            display: block;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: var(--spacing-xl);
+            display: none;
+        }
+        
+        .success-message.active {
+            display: block;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: var(--spacing-lg);
+        }
+        
+        .back-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .loading-slots {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="schedule-page">
+        <div class="schedule-container">
+            <div class="schedule-header">
+                <h1>Schedule a Meeting</h1>
+                <p id="scheduleSubtitle">Book a time to meet</p>
+            </div>
+            
+            <div id="loadingSlots" class="loading-slots">
+                <div class="spinner" style="margin: 0 auto var(--spacing-md);"></div>
+                <p>Loading available times...</p>
+            </div>
+            
+            <div id="availabilitySection" style="display: none;">
+                <h3 style="margin-bottom: var(--spacing-md);">Select a time:</h3>
+                <div id="availabilityGrid" class="availability-grid"></div>
+            </div>
+            
+            <div id="bookingForm" class="booking-form">
+                <h3 style="margin-bottom: var(--spacing-md);">Your Information</h3>
+                <form id="meetingBookingForm">
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" id="attendeeName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email (optional)</label>
+                        <input type="email" id="attendeeEmail">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Meeting Title *</label>
+                        <input type="text" id="meetingTitle" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description (optional)</label>
+                        <textarea id="meetingDescription" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Selected Time</label>
+                        <input type="text" id="selectedTimeDisplay" readonly>
+                    </div>
+                    
+                    <div style="display: flex; gap: var(--spacing-sm);">
+                        <button type="button" class="btn btn-secondary" onclick="backToSlots()">
+                            ← Back
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            Book Meeting
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                <div class="success-icon">✓</div>
+                <h2 style="color: var(--success); margin-bottom: var(--spacing-sm);">Meeting Booked!</h2>
+                <p>Your meeting has been successfully scheduled. The host will be notified.</p>
+                <div class="back-link">
+                    <a href="#" onclick="location.reload()">← Schedule Another Meeting</a>
+                </div>
+            </div>
+            
+            <div id="errorMessage" class="message error" style="margin-top: var(--spacing-lg);"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'https://scheduler-backend-j95s.onrender.com'; // Change this to your deployed backend URL
+        let availableSlots = [];
+        let selectedSlot = null;
+        let username = null;
+        
+        // Get username from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        username = urlParams.get('user');
+        
+        if (!username) {
+            document.getElementById('loadingSlots').innerHTML = '<p style="color: var(--error);">Invalid meeting link</p>';
+        } else {
+            document.getElementById('scheduleSubtitle').textContent = `with ${username}`;
+            loadAvailability();
+        }
+        
+        async function loadAvailability() {
+            try {
+                const response = await fetch(`${API_URL}/api/public/availability/${username}?days_ahead=7`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    availableSlots = data.available_slots;
+                    renderAvailability();
+                } else {
+                    showError('Could not load availability. User may not exist.');
+                }
+            } catch (error) {
+                showError('Connection error. Is the backend running?');
+            }
+        }
+        
+        function renderAvailability() {
+            document.getElementById('loadingSlots').style.display = 'none';
+            document.getElementById('availabilitySection').style.display = 'block';
+            
+            const grid = document.getElementById('availabilityGrid');
+            
+            if (availableSlots.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No available time slots in the next 7 days.</p>';
+                return;
+            }
+            
+            // Group slots by date
+            const slotsByDate = {};
+            availableSlots.forEach((slot, index) => {
+                const start = new Date(slot.start_time);
+                const dateKey = start.toDateString();
+                
+                if (!slotsByDate[dateKey]) {
+                    slotsByDate[dateKey] = [];
+                }
+                
+                // Create 30-minute slots from available windows
+                const end = new Date(slot.end_time);
+                let currentTime = new Date(start);
+                
+                while (currentTime < end) {
+                    const slotEnd = new Date(currentTime.getTime() + 30 * 60000); // 30 min later
+                    if (slotEnd <= end) {
+                        slotsByDate[dateKey].push({
+                            start: new Date(currentTime),
+                            end: slotEnd,
+                            index: slotsByDate[dateKey].length
+                        });
+                    }
+                    currentTime = slotEnd;
+                }
+            });
+            
+            // Render grouped slots
+            grid.innerHTML = Object.entries(slotsByDate).map(([date, slots]) => {
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                return `
+                    <div style="margin-bottom: var(--spacing-md);">
+                        <h4 style="margin-bottom: var(--spacing-sm); color: var(--text-secondary);">${formattedDate}</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm);">
+                            ${slots.map(slot => `
+                                <div class="time-slot" onclick="selectSlot('${slot.start.toISOString()}', '${slot.end.toISOString()}')">
+                                    <div class="time-slot-time">${slot.start.toLocaleTimeString('en-US', { 
+                                        hour: 'numeric', 
+                                        minute: '2-digit' 
+                                    })}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function selectSlot(startTime, endTime) {
+            selectedSlot = { start: startTime, end: endTime };
+            
+            // Update UI
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            event.target.closest('.time-slot').classList.add('selected');
+            
+            // Show booking form
+            document.getElementById('availabilitySection').style.display = 'none';
+            document.getElementById('bookingForm').classList.add('active');
+            
+            // Display selected time
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+            document.getElementById('selectedTimeDisplay').value = `${start.toLocaleString()} - ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        }
+        
+        function backToSlots() {
+            document.getElementById('bookingForm').classList.remove('active');
+            document.getElementById('availabilitySection').style.display = 'block';
+        }
+        
+        document.getElementById('meetingBookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await bookMeeting();
+        });
+        
+        async function bookMeeting() {
+            if (!selectedSlot) return;
+            
+            const meeting = {
+                title: document.getElementById('meetingTitle').value,
+                description: document.getElementById('meetingDescription').value,
+                attendee_name: document.getElementById('attendeeName').value,
+                attendee_email: document.getElementById('attendeeEmail').value || null,
+                start_time: selectedSlot.start,
+                end_time: selectedSlot.end
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/public/schedule/${username}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(meeting)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('bookingForm').classList.remove('active');
+                    document.getElementById('successMessage').classList.add('active');
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Could not book meeting. Time slot may no longer be available.');
+                }
+            } catch (error) {
+                showError('Connection error. Please try again.');
+            }
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => errorEl.style.display = 'none', 5000);
+        }
+    </script>
+</body>
+</html>
