@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'https://scheduler-backend-j95s.onrender.com'; // Change this to your deployed backend URL
+const API_URL = 'https://scheduler-backend-j95s.onrender.com';
 
 // State management
 let token = localStorage.getItem('token');
