@@ -82,7 +82,7 @@
         
         /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -266,6 +266,11 @@
             background: #d45a3f;
         }
         
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
         /* File Upload */
         .file-upload {
             border: 2px dashed var(--teal);
@@ -329,17 +334,21 @@
             gap: 0.5rem;
         }
         
-        .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+        /* Google Calendar Style Views */
+        .calendar-wrapper {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
         }
         
-        /* Calendar */
         .calendar-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--cream);
+            border-bottom: 2px solid var(--gray-light);
             flex-wrap: wrap;
             gap: 1rem;
         }
@@ -347,9 +356,10 @@
         .view-switcher {
             display: flex;
             gap: 0.5rem;
-            background: var(--cream);
+            background: var(--white);
             padding: 0.25rem;
             border-radius: 8px;
+            border: 1px solid var(--gray-light);
         }
         
         .view-btn {
@@ -361,6 +371,11 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
+            color: var(--navy);
+        }
+        
+        .view-btn:hover {
+            background: var(--cream);
         }
         
         .view-btn.active {
@@ -378,54 +393,90 @@
             font-family: var(--serif);
             font-size: 1.5rem;
             font-weight: 600;
-            min-width: 200px;
+            min-width: 250px;
             text-align: center;
+        }
+        
+        .calendar-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Week/Day View Grid */
+        .calendar-grid-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
         }
         
         .calendar-grid {
             display: grid;
-            gap: 1px;
-            background: var(--gray-light);
-            border-radius: 12px;
-            overflow: hidden;
+            min-width: 800px;
         }
         
-        .calendar-day-view .calendar-grid {
-            grid-template-columns: 80px 1fr;
-        }
-        
-        .calendar-week-view .calendar-grid {
+        .week-view .calendar-grid {
             grid-template-columns: 80px repeat(7, 1fr);
         }
         
-        .calendar-month-view .calendar-grid {
-            grid-template-columns: repeat(7, 1fr);
+        .day-view .calendar-grid {
+            grid-template-columns: 80px 1fr;
         }
         
-        .calendar-header {
+        .calendar-header-row {
+            display: contents;
+        }
+        
+        .time-gutter-header {
             background: var(--navy);
             color: var(--white);
             padding: 1rem;
             font-weight: 600;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         
-        .calendar-cell {
-            background: var(--white);
-            padding: 0.75rem;
-            min-height: 80px;
-            position: relative;
+        .day-header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-left: 1px solid rgba(255,255,255,0.1);
         }
         
-        .time-label {
+        .day-header-date {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+        
+        .time-slot {
             background: var(--cream);
             padding: 0.5rem;
             font-size: 0.875rem;
             font-weight: 500;
             text-align: center;
+            border-top: 1px solid var(--gray-light);
+            position: sticky;
+            left: 0;
+            z-index: 5;
         }
         
-        .event {
+        .day-cell {
+            background: var(--white);
+            padding: 0.5rem;
+            min-height: 60px;
+            border-top: 1px solid var(--gray-light);
+            border-left: 1px solid var(--gray-light);
+            position: relative;
+        }
+        
+        .event-block {
             background: var(--teal);
             color: var(--white);
             padding: 0.5rem;
@@ -434,20 +485,105 @@
             font-size: 0.875rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            overflow: hidden;
         }
         
-        .event:hover {
+        .event-block:hover {
             background: var(--teal-light);
             transform: scale(1.02);
+            z-index: 100;
         }
         
-        .event.study-block {
+        .event-block.study-block {
             background: var(--sand);
             color: var(--navy);
         }
         
-        .event.activity {
+        .event-block.activity {
             background: var(--coral);
+        }
+        
+        .event-time {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+        
+        .event-title {
+            font-weight: 500;
+            margin-top: 0.125rem;
+        }
+        
+        /* Month View */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: var(--gray-light);
+        }
+        
+        .month-day-header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .month-day {
+            background: var(--white);
+            min-height: 120px;
+            padding: 0.5rem;
+        }
+        
+        .month-day.other-month {
+            background: var(--cream);
+            opacity: 0.6;
+        }
+        
+        .month-day-number {
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+        
+        .month-day-number.today {
+            background: var(--teal);
+            color: var(--white);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .month-event {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 3px;
+            background: var(--teal);
+            color: var(--white);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .month-event.study-block {
+            background: var(--sand);
+            color: var(--navy);
+        }
+        
+        .month-event.activity {
+            background: var(--coral);
+        }
+        
+        .month-more {
+            font-size: 0.75rem;
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
         }
         
         /* Loading */
@@ -528,6 +664,10 @@
             
             .calendar-controls {
                 flex-direction: column;
+            }
+            
+            .calendar-grid-container {
+                overflow-x: scroll;
             }
         }
         
@@ -691,8 +831,8 @@
     </div>
 
     <script>
-        // Configuration
-        const API_URL = 'https://cmucal.onrender.com'; // Replace with your Render deployment URL
+        // Configuration - REPLACE WITH YOUR RENDER URL!
+        const API_URL = 'https://cmucal.onrender.com';
         
         // State
         let calendarEvents = [];
@@ -706,7 +846,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             setupTabs();
             setupFileUploads();
-            updateCalendar();
         });
 
         // Tab Management
@@ -934,7 +1073,7 @@
             const scheduleContent = document.getElementById('scheduleContent');
             
             scheduleContent.innerHTML = `
-                <div class="card">
+                <div class="calendar-wrapper">
                     <div class="calendar-controls">
                         <div class="view-switcher">
                             <button class="view-btn ${currentView === 'day' ? 'active' : ''}" onclick="setView('day')">Day</button>
@@ -942,13 +1081,16 @@
                             <button class="view-btn ${currentView === 'month' ? 'active' : ''}" onclick="setView('month')">Month</button>
                         </div>
                         <div class="calendar-nav">
-                            <button class="btn btn-outline" onclick="navigateCalendar(-1)">← Previous</button>
+                            <button class="btn btn-outline btn-small" onclick="navigateCalendar(-1)">← Prev</button>
                             <div class="calendar-title" id="calendarTitle"></div>
-                            <button class="btn btn-outline" onclick="navigateCalendar(1)">Next →</button>
+                            <button class="btn btn-outline btn-small" onclick="navigateCalendar(1)">Next →</button>
                         </div>
-                        <button class="btn btn-primary" onclick="exportSchedule()">Download .ics</button>
+                        <div class="calendar-actions">
+                            <button class="btn btn-secondary btn-small" onclick="regenerateSchedule()">🔄 Regenerate</button>
+                            <button class="btn btn-primary btn-small" onclick="exportSchedule()">💾 Download .ics</button>
+                        </div>
                     </div>
-                    <div id="calendar" class="calendar-grid"></div>
+                    <div id="calendar"></div>
                 </div>
             `;
             
@@ -958,6 +1100,12 @@
         function setView(view) {
             currentView = view;
             updateCalendar();
+            
+            // Update active button
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
         }
 
         function navigateCalendar(direction) {
@@ -976,10 +1124,22 @@
             const title = document.getElementById('calendarTitle');
             if (!calendar || !title) return;
 
-            // Combine all events
+            // Combine all events with proper parsing
             const allEvents = [
-                ...calendarEvents.map(e => ({ ...e, type: 'calendar' })),
-                ...currentSchedule.map(e => ({ ...e, summary: e.name, type: e.type || 'study' }))
+                ...calendarEvents.map(e => ({
+                    ...e,
+                    start: new Date(e.start),
+                    end: new Date(e.end),
+                    type: 'calendar',
+                    summary: e.summary
+                })),
+                ...currentSchedule.map(e => ({
+                    ...e,
+                    start: new Date(e.start),
+                    end: new Date(e.end),
+                    type: e.type || 'study',
+                    summary: e.name
+                }))
             ];
 
             if (currentView === 'week') {
@@ -994,46 +1154,67 @@
         function displayWeekView(calendar, title, events) {
             const startOfWeek = new Date(currentDate);
             startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            startOfWeek.setHours(0, 0, 0, 0);
             
-            title.textContent = `Week of ${startOfWeek.toLocaleDateString()}`;
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 6);
             
-            calendar.className = 'calendar-grid calendar-week-view';
+            title.textContent = `${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
             
-            let html = '<div class="calendar-header"></div>';
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            days.forEach((day, i) => {
+            calendar.className = 'calendar-grid-container week-view';
+            
+            let html = '<div class="calendar-grid"><div class="calendar-header-row">';
+            html += '<div class="time-gutter-header">Time</div>';
+            
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            for (let i = 0; i < 7; i++) {
                 const date = new Date(startOfWeek);
                 date.setDate(date.getDate() + i);
-                html += `<div class="calendar-header">${day}<br>${date.getDate()}</div>`;
-            });
+                html += `
+                    <div class="day-header">
+                        <div>${days[i]}</div>
+                        <div class="day-header-date">${date.getDate()}</div>
+                    </div>
+                `;
+            }
+            html += '</div>';
             
             // Generate hourly rows
             for (let hour = 0; hour < 24; hour++) {
-                html += `<div class="time-label">${hour.toString().padStart(2, '0')}:00</div>`;
+                html += `<div class="time-slot">${hour.toString().padStart(2, '0')}:00</div>`;
                 
                 for (let day = 0; day < 7; day++) {
                     const cellDate = new Date(startOfWeek);
                     cellDate.setDate(cellDate.getDate() + day);
                     cellDate.setHours(hour, 0, 0, 0);
                     
+                    const cellEndDate = new Date(cellDate);
+                    cellEndDate.setHours(hour + 1, 0, 0, 0);
+                    
+                    // Find events that overlap with this hour
                     const cellEvents = events.filter(e => {
-                        const start = new Date(e.start);
-                        return start.getDate() === cellDate.getDate() &&
-                               start.getMonth() === cellDate.getMonth() &&
-                               start.getHours() === hour;
+                        return e.start < cellEndDate && e.end > cellDate;
                     });
                     
-                    let cellHtml = '<div class="calendar-cell">';
+                    html += '<div class="day-cell">';
                     cellEvents.forEach(e => {
                         const className = e.type === 'study' ? 'study-block' : 
                                         e.type === 'activity' ? 'activity' : '';
-                        cellHtml += `<div class="event ${className}">${e.summary || e.name}</div>`;
+                        const startTime = e.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        const endTime = e.end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        
+                        html += `
+                            <div class="event-block ${className}" title="${e.summary}\n${startTime} - ${endTime}">
+                                <div class="event-time">${startTime} - ${endTime}</div>
+                                <div class="event-title">${e.summary}</div>
+                            </div>
+                        `;
                     });
-                    cellHtml += '</div>';
-                    html += cellHtml;
+                    html += '</div>';
                 }
             }
             
+            html += '</div>';
             calendar.innerHTML = html;
         }
 
@@ -1045,33 +1226,52 @@
                 day: 'numeric' 
             });
             
-            calendar.className = 'calendar-grid calendar-day-view';
+            calendar.className = 'calendar-grid-container day-view';
             
-            let html = '<div class="calendar-header">Time</div><div class="calendar-header">Events</div>';
+            const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+            const dayDate = currentDate.getDate();
+            
+            let html = '<div class="calendar-grid"><div class="calendar-header-row">';
+            html += '<div class="time-gutter-header">Time</div>';
+            html += `
+                <div class="day-header">
+                    <div>${dayName}</div>
+                    <div class="day-header-date">${dayDate}</div>
+                </div>
+            `;
+            html += '</div>';
             
             for (let hour = 0; hour < 24; hour++) {
-                html += `<div class="time-label">${hour.toString().padStart(2, '0')}:00</div>`;
+                html += `<div class="time-slot">${hour.toString().padStart(2, '0')}:00</div>`;
                 
                 const cellDate = new Date(currentDate);
                 cellDate.setHours(hour, 0, 0, 0);
                 
+                const cellEndDate = new Date(cellDate);
+                cellEndDate.setHours(hour + 1, 0, 0, 0);
+                
                 const cellEvents = events.filter(e => {
-                    const start = new Date(e.start);
-                    return start.getDate() === cellDate.getDate() &&
-                           start.getMonth() === cellDate.getMonth() &&
-                           start.getHours() === hour;
+                    return e.start < cellEndDate && e.end > cellDate;
                 });
                 
-                let cellHtml = '<div class="calendar-cell">';
+                html += '<div class="day-cell">';
                 cellEvents.forEach(e => {
                     const className = e.type === 'study' ? 'study-block' : 
                                     e.type === 'activity' ? 'activity' : '';
-                    cellHtml += `<div class="event ${className}">${e.summary || e.name}</div>`;
+                    const startTime = e.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                    const endTime = e.end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                    
+                    html += `
+                        <div class="event-block ${className}" title="${e.summary}\n${startTime} - ${endTime}">
+                            <div class="event-time">${startTime} - ${endTime}</div>
+                            <div class="event-title">${e.summary}</div>
+                        </div>
+                    `;
                 });
-                cellHtml += '</div>';
-                html += cellHtml;
+                html += '</div>';
             }
             
+            html += '</div>';
             calendar.innerHTML = html;
         }
 
@@ -1084,44 +1284,77 @@
                 month: 'long' 
             });
             
-            calendar.className = 'calendar-grid calendar-month-view';
+            calendar.className = 'month-grid';
             
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            let html = days.map(day => `<div class="calendar-header">${day}</div>`).join('');
+            let html = days.map(day => `<div class="month-day-header">${day}</div>`).join('');
             
             const startDay = firstDay.getDay();
             const daysInMonth = lastDay.getDate();
             
-            // Add empty cells for days before month starts
-            for (let i = 0; i < startDay; i++) {
-                html += '<div class="calendar-cell"></div>';
+            // Days before month starts
+            const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+            for (let i = startDay - 1; i >= 0; i--) {
+                html += `
+                    <div class="month-day other-month">
+                        <div class="month-day-number">${prevMonthLastDay - i}</div>
+                    </div>
+                `;
             }
             
-            // Add cells for each day of month
+            // Days of current month
+            const today = new Date();
             for (let day = 1; day <= daysInMonth; day++) {
                 const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const isToday = cellDate.toDateString() === today.toDateString();
                 
                 const cellEvents = events.filter(e => {
-                    const start = new Date(e.start);
-                    return start.getDate() === day &&
-                           start.getMonth() === currentDate.getMonth() &&
-                           start.getFullYear() === currentDate.getFullYear();
+                    return e.start.getDate() === day &&
+                           e.start.getMonth() === currentDate.getMonth() &&
+                           e.start.getFullYear() === currentDate.getFullYear();
                 });
                 
-                let cellHtml = `<div class="calendar-cell"><strong>${day}</strong><br>`;
+                html += `
+                    <div class="month-day">
+                        <div class="month-day-number ${isToday ? 'today' : ''}">${day}</div>
+                `;
+                
                 cellEvents.slice(0, 3).forEach(e => {
                     const className = e.type === 'study' ? 'study-block' : 
                                     e.type === 'activity' ? 'activity' : '';
-                    cellHtml += `<div class="event ${className}">${e.summary || e.name}</div>`;
+                    const timeStr = e.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                    html += `
+                        <div class="month-event ${className}" title="${e.summary} at ${timeStr}">
+                            ${timeStr} ${e.summary}
+                        </div>
+                    `;
                 });
+                
                 if (cellEvents.length > 3) {
-                    cellHtml += `<div style="font-size: 0.75rem; color: var(--gray-medium);">+${cellEvents.length - 3} more</div>`;
+                    html += `<div class="month-more">+${cellEvents.length - 3} more</div>`;
                 }
-                cellHtml += '</div>';
-                html += cellHtml;
+                
+                html += '</div>';
+            }
+            
+            // Days after month ends
+            const remainingCells = 42 - (startDay + daysInMonth); // 6 rows × 7 days
+            for (let i = 1; i <= remainingCells; i++) {
+                html += `
+                    <div class="month-day other-month">
+                        <div class="month-day-number">${i}</div>
+                    </div>
+                `;
             }
             
             calendar.innerHTML = html;
+        }
+
+        // Regenerate Schedule
+        async function regenerateSchedule() {
+            if (confirm('Generate a new schedule? This will replace your current one.')) {
+                await generateSchedule();
+            }
         }
 
         // Export Schedule
