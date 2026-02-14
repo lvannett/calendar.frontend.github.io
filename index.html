@@ -3,241 +3,1241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMUCal - Manage Your Academic & Residential Life</title>
-    
-    <!-- Fonts -->
+    <title>CMU Schedule Planner</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
-    
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --navy: #1a2332;
+            --navy-light: #2d3e50;
+            --teal: #2a9d8f;
+            --teal-light: #47b5a6;
+            --coral: #e76f51;
+            --sand: #f4a261;
+            --cream: #fef7ed;
+            --gray-light: #e8e8e8;
+            --gray-medium: #a0a0a0;
+            --white: #ffffff;
+            
+            --serif: 'Crimson Pro', serif;
+            --sans: 'DM Sans', sans-serif;
+            
+            --shadow-sm: 0 2px 8px rgba(26, 35, 50, 0.08);
+            --shadow-md: 0 4px 16px rgba(26, 35, 50, 0.12);
+            --shadow-lg: 0 8px 32px rgba(26, 35, 50, 0.16);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--sans);
+            background: linear-gradient(135deg, var(--cream) 0%, #fff 100%);
+            color: var(--navy);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 2rem 2rem 1.5rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--teal) 0%, transparent 60%);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        h1 {
+            font-family: var(--serif);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.85;
+            font-weight: 400;
+            position: relative;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--gray-light);
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            font-family: var(--sans);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-medium);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab:hover {
+            color: var(--navy);
+            background: rgba(42, 157, 143, 0.05);
+        }
+        
+        .tab.active {
+            color: var(--teal);
+            border-bottom-color: var(--teal);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-title {
+            font-family: var(--serif);
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: var(--teal);
+            border-radius: 2px;
+        }
+        
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        label {
+            font-weight: 500;
+            color: var(--navy);
+            font-size: 0.9rem;
+        }
+        
+        input, select, textarea {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            font-family: var(--sans);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--sans);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--teal);
+            color: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover {
+            background: var(--teal-light);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--navy);
+            border: 2px solid var(--sand);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--sand);
+            border-color: var(--sand);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--teal);
+            border: 2px solid var(--teal);
+        }
+        
+        .btn-outline:hover {
+            background: var(--teal);
+            color: var(--white);
+        }
+        
+        .btn-danger {
+            background: var(--coral);
+            color: var(--white);
+        }
+        
+        .btn-danger:hover {
+            background: #d45a3f;
+        }
+        
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--teal);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            background: rgba(42, 157, 143, 0.03);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            background: rgba(42, 157, 143, 0.08);
+            border-color: var(--teal-light);
+        }
+        
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        
+        /* Lists */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .item {
+            background: var(--cream);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--teal);
+            transition: all 0.3s ease;
+        }
+        
+        .item:hover {
+            background: #fef0dd;
+            transform: translateX(4px);
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-details {
+            font-size: 0.875rem;
+            color: var(--gray-medium);
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Calendar */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .view-switcher {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--cream);
+            padding: 0.25rem;
+            border-radius: 8px;
+        }
+        
+        .view-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--sans);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .view-btn.active {
+            background: var(--teal);
+            color: var(--white);
+        }
+        
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .calendar-title {
+            font-family: var(--serif);
+            font-size: 1.5rem;
+            font-weight: 600;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--gray-light);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .calendar-day-view .calendar-grid {
+            grid-template-columns: 80px 1fr;
+        }
+        
+        .calendar-week-view .calendar-grid {
+            grid-template-columns: 80px repeat(7, 1fr);
+        }
+        
+        .calendar-month-view .calendar-grid {
+            grid-template-columns: repeat(7, 1fr);
+        }
+        
+        .calendar-header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .calendar-cell {
+            background: var(--white);
+            padding: 0.75rem;
+            min-height: 80px;
+            position: relative;
+        }
+        
+        .time-label {
+            background: var(--cream);
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .event {
+            background: var(--teal);
+            color: var(--white);
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .event:hover {
+            background: var(--teal-light);
+            transform: scale(1.02);
+        }
+        
+        .event.study-block {
+            background: var(--sand);
+            color: var(--navy);
+        }
+        
+        .event.activity {
+            background: var(--coral);
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            border: 4px solid var(--gray-light);
+            border-top: 4px solid var(--teal);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .alert-success {
+            background: rgba(42, 157, 143, 0.1);
+            color: var(--teal);
+            border-left: 4px solid var(--teal);
+        }
+        
+        .alert-error {
+            background: rgba(231, 111, 81, 0.1);
+            color: var(--coral);
+            border-left: 4px solid var(--coral);
+        }
+        
+        .alert-info {
+            background: rgba(244, 162, 97, 0.1);
+            color: var(--sand);
+            border-left: 4px solid var(--sand);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-medium);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-controls {
+                flex-direction: column;
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <!-- Login Page -->
-    <div id="loginPage" class="page active">
-        <div class="login-container">
-            <div class="login-left">
-                <div class="login-content">
-                    <h1 class="brand">CMUCal</h1>
-                    <p class="tagline">Smart scheduling for college RAs and CAs</p>
-                    
-                    <div id="authMessage" class="message"></div>
-                    
-                    <form id="authForm" class="auth-form">
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" name="username" required autocomplete="username">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" name="password" required autocomplete="current-password">
-                        </div>
-                        
-                        <div class="auth-buttons">
-                            <button type="submit" id="loginBtn" class="btn btn-primary">Log In</button>
-                            <button type="button" id="registerBtn" class="btn btn-secondary">Create Account</button>
-                        </div>
-                    </form>
+    <header>
+        <h1>CMU Schedule Planner</h1>
+        <p class="subtitle">Intelligent study scheduling powered by AI</p>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="setup">Setup</button>
+            <button class="tab" data-tab="schedule">Schedule</button>
+            <button class="tab" data-tab="adjust">Adjust Plan</button>
+        </div>
+
+        <!-- Setup Tab -->
+        <div id="setup" class="tab-content active">
+            <!-- Calendar Import -->
+            <div class="card">
+                <h2 class="card-title">Import Calendar</h2>
+                <div class="file-upload" id="calendarUpload">
+                    <input type="file" id="calendarFile" accept=".ics">
+                    <p>📅 Click to upload your .ics calendar file</p>
+                    <p style="font-size: 0.875rem; color: var(--gray-medium); margin-top: 0.5rem;">
+                        Export from Google Calendar: Settings → Import & Export → Export
+                    </p>
                 </div>
+                <div id="calendarStatus" class="hidden"></div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="card">
+                <h2 class="card-title">Sleep Schedule</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="wakeTime">Wake Up Time</label>
+                        <input type="time" id="wakeTime" value="08:00">
+                    </div>
+                    <div class="form-group">
+                        <label for="bedTime">Bedtime</label>
+                        <input type="time" id="bedTime" value="23:00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Assignment -->
+            <div class="card">
+                <h2 class="card-title">Add Assignment</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="assignmentName">Assignment Name</label>
+                        <input type="text" id="assignmentName" placeholder="e.g., Set Theory Homework">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentDue">Due Date</label>
+                        <input type="datetime-local" id="assignmentDue">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentHours">Hours Needed</label>
+                        <input type="number" id="assignmentHours" min="0.5" step="0.5" placeholder="e.g., 6">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentPriority">Priority (1-5)</label>
+                        <select id="assignmentPriority">
+                            <option value="1">1 - Highest</option>
+                            <option value="2">2 - High</option>
+                            <option value="3" selected>3 - Medium</option>
+                            <option value="4">4 - Low</option>
+                            <option value="5">5 - Lowest</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
+                
+                <div id="assignmentList" class="item-list" style="margin-top: 2rem;"></div>
+            </div>
+
+            <!-- Add Activity -->
+            <div class="card">
+                <h2 class="card-title">Add Activity</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="activityName">Activity Name</label>
+                        <input type="text" id="activityName" placeholder="e.g., Guitar Practice">
+                    </div>
+                    <div class="form-group">
+                        <label for="activityHours">Hours</label>
+                        <input type="number" id="activityHours" min="0.5" step="0.5" placeholder="e.g., 3">
+                    </div>
+                    <div class="form-group">
+                        <label for="activityPriority">Priority (1-5)</label>
+                        <select id="activityPriority">
+                            <option value="1">1 - Highest</option>
+                            <option value="2">2 - High</option>
+                            <option value="3" selected>3 - Medium</option>
+                            <option value="4">4 - Low</option>
+                            <option value="5">5 - Lowest</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDue">Due Date (Optional)</label>
+                        <input type="datetime-local" id="activityDue">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="activityWeekly">
+                        This is a weekly recurring activity
+                    </label>
+                </div>
+                <button class="btn btn-primary" onclick="addActivity()">Add Activity</button>
+                
+                <div id="activityList" class="item-list" style="margin-top: 2rem;"></div>
+            </div>
+
+            <!-- Generate Schedule -->
+            <div class="card">
+                <button class="btn btn-primary" onclick="generateSchedule()" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1.125rem;">
+                    🎯 Generate Schedule
+                </button>
+            </div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <div id="scheduleContent">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📅</div>
+                    <p>No schedule generated yet. Go to Setup to create your schedule.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adjust Tab -->
+        <div id="adjust" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">Adjust Schedule</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--gray-medium);">
+                    Upload your updated calendar with new events, and we'll adjust your study schedule with minimal changes.
+                </p>
+                
+                <div class="file-upload" id="adjustCalendarUpload">
+                    <input type="file" id="adjustCalendarFile" accept=".ics">
+                    <p>📅 Click to upload updated .ics calendar file</p>
+                </div>
+                <div id="adjustCalendarStatus" class="hidden"></div>
+                
+                <button class="btn btn-primary" onclick="adjustSchedule()" style="margin-top: 1.5rem;">
+                    🔄 Adjust Schedule
+                </button>
             </div>
             
-            <div class="login-right">
-                <div class="feature-showcase">
-                    <div class="feature-item" style="animation-delay: 0.1s">
-                        <div class="feature-icon">📚</div>
-                        <h3>Smart Scheduling</h3>
-                        <p>Auto-generate study blocks that respect your availability and rotate between subjects</p>
-                    </div>
-                    <div class="feature-item" style="animation-delay: 0.2s">
-                        <div class="feature-icon">🎯</div>
-                        <h3>Time Tracking</h3>
-                        <p>Learn from past assignments to estimate future work more accurately</p>
-                    </div>
-                    <div class="feature-item" style="animation-delay: 0.3s">
-                        <div class="feature-icon">🤝</div>
-                        <h3>Meeting Scheduler</h3>
-                        <p>Share your availability link for easy meeting bookings</p>
-                    </div>
-                </div>
-            </div>
+            <div id="adjustedScheduleContent"></div>
         </div>
     </div>
 
-    <!-- Dashboard Page -->
-    <div id="dashboardPage" class="page">
-        <!-- Header -->
-        <header class="dashboard-header">
-            <div class="header-content">
-                <h1 class="brand-small">RA/CA Scheduler</h1>
-                <div class="header-right">
-                    <span id="usernameDisplay" class="username-display"></span>
-                    <button id="logoutBtn" class="btn btn-ghost">Log Out</button>
-                </div>
-            </div>
-        </header>
+    <script>
+        // Configuration
+        const API_URL = 'https://cmucal.onrender.com'; // Replace with your Render deployment URL
+        
+        // State
+        let calendarEvents = [];
+        let assignments = [];
+        let activities = [];
+        let currentSchedule = [];
+        let currentView = 'week';
+        let currentDate = new Date();
 
-        <!-- Main Content -->
-        <div class="dashboard-content">
-            <!-- Sidebar Navigation -->
-            <nav class="sidebar">
-                <button class="nav-item active" data-view="calendar">
-                    <span class="nav-icon">📅</span>
-                    <span>Calendar</span>
-                </button>
-                <button class="nav-item" data-view="assignments">
-                    <span class="nav-icon">✏️</span>
-                    <span>Assignments</span>
-                </button>
-                <button class="nav-item" data-view="schedule">
-                    <span class="nav-icon">🎓</span>
-                    <span>Classes</span>
-                </button>
-                <button class="nav-item" data-view="meetings">
-                    <span class="nav-icon">🤝</span>
-                    <span>Meetings</span>
-                </button>
-                <button class="nav-item" data-view="study-blocks">
-                    <span class="nav-icon">📖</span>
-                    <span>Study Blocks</span>
-                </button>
-                <button class="nav-item" data-view="settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span>Settings</span>
-                </button>
-            </nav>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabs();
+            setupFileUploads();
+            updateCalendar();
+        });
 
-            <!-- Main View Area -->
-            <main class="main-view">
-                <!-- Calendar View -->
-                <div id="calendarView" class="view active">
-                    <div class="view-header">
-                        <h2>Calendar</h2>
-                        <p class="view-subtitle">Your complete schedule at a glance</p>
-                    </div>
-                    <div class="calendar-container">
-                        <div id="calendar"></div>
-                    </div>
-                </div>
+        // Tab Management
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+        }
 
-                <!-- Assignments View -->
-                <div id="assignmentsView" class="view">
-                    <div class="view-header">
-                        <div>
-                            <h2>Assignments</h2>
-                            <p class="view-subtitle">Track your academic work and RA duties</p>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // File Upload
+        function setupFileUploads() {
+            const calendarUpload = document.getElementById('calendarUpload');
+            const calendarFile = document.getElementById('calendarFile');
+            
+            calendarUpload.addEventListener('click', () => calendarFile.click());
+            calendarFile.addEventListener('change', handleCalendarUpload);
+            
+            const adjustCalendarUpload = document.getElementById('adjustCalendarUpload');
+            const adjustCalendarFile = document.getElementById('adjustCalendarFile');
+            
+            adjustCalendarUpload.addEventListener('click', () => adjustCalendarFile.click());
+            adjustCalendarFile.addEventListener('change', handleAdjustCalendarUpload);
+        }
+
+        async function handleCalendarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const content = e.target.result;
+                await parseCalendar(content);
+            };
+            reader.readAsText(file);
+        }
+
+        async function parseCalendar(icalContent) {
+            try {
+                const response = await fetch(`${API_URL}/api/calendar/parse`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ical_content: icalContent })
+                });
+
+                const data = await response.json();
+                calendarEvents = data.events;
+
+                const status = document.getElementById('calendarStatus');
+                status.className = 'alert alert-success';
+                status.innerHTML = `✓ Imported ${calendarEvents.length} events`;
+                status.classList.remove('hidden');
+            } catch (error) {
+                showError('Failed to parse calendar: ' + error.message);
+            }
+        }
+
+        // Assignments
+        function addAssignment() {
+            const name = document.getElementById('assignmentName').value;
+            const due = document.getElementById('assignmentDue').value;
+            const hours = parseFloat(document.getElementById('assignmentHours').value);
+            const priority = parseInt(document.getElementById('assignmentPriority').value);
+
+            if (!name || !due || !hours) {
+                alert('Please fill in all assignment fields');
+                return;
+            }
+
+            assignments.push({ name, due_date: due, hours_needed: hours, priority });
+            updateAssignmentList();
+            
+            // Clear form
+            document.getElementById('assignmentName').value = '';
+            document.getElementById('assignmentDue').value = '';
+            document.getElementById('assignmentHours').value = '';
+        }
+
+        function updateAssignmentList() {
+            const list = document.getElementById('assignmentList');
+            if (assignments.length === 0) {
+                list.innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = assignments.map((a, index) => `
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">${a.name}</div>
+                        <div class="item-details">
+                            Due: ${new Date(a.due_date).toLocaleString()} | 
+                            ${a.hours_needed}h | 
+                            Priority: ${a.priority}
                         </div>
-                        <button id="addAssignmentBtn" class="btn btn-primary">+ New Assignment</button>
                     </div>
+                    <div class="item-actions">
+                        <button class="btn btn-danger btn-small" onclick="removeAssignment(${index})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeAssignment(index) {
+            assignments.splice(index, 1);
+            updateAssignmentList();
+        }
+
+        // Activities
+        function addActivity() {
+            const name = document.getElementById('activityName').value;
+            const hours = parseFloat(document.getElementById('activityHours').value);
+            const priority = parseInt(document.getElementById('activityPriority').value);
+            const due = document.getElementById('activityDue').value;
+            const isWeekly = document.getElementById('activityWeekly').checked;
+
+            if (!name || !hours) {
+                alert('Please fill in activity name and hours');
+                return;
+            }
+
+            activities.push({ 
+                name, 
+                hours, 
+                priority, 
+                due_date: due || null,
+                is_weekly: isWeekly
+            });
+            updateActivityList();
+            
+            // Clear form
+            document.getElementById('activityName').value = '';
+            document.getElementById('activityHours').value = '';
+            document.getElementById('activityDue').value = '';
+            document.getElementById('activityWeekly').checked = false;
+        }
+
+        function updateActivityList() {
+            const list = document.getElementById('activityList');
+            if (activities.length === 0) {
+                list.innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = activities.map((a, index) => `
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">${a.name}</div>
+                        <div class="item-details">
+                            ${a.hours}h | Priority: ${a.priority}
+                            ${a.due_date ? ` | Due: ${new Date(a.due_date).toLocaleString()}` : ''}
+                            ${a.is_weekly ? ' | Weekly' : ''}
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-danger btn-small" onclick="removeActivity(${index})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeActivity(index) {
+            activities.splice(index, 1);
+            updateActivityList();
+        }
+
+        // Generate Schedule
+        async function generateSchedule() {
+            if (assignments.length === 0) {
+                alert('Please add at least one assignment');
+                return;
+            }
+
+            const preferences = {
+                wake_time: document.getElementById('wakeTime').value,
+                bed_time: document.getElementById('bedTime').value
+            };
+
+            // Show loading
+            const scheduleContent = document.getElementById('scheduleContent');
+            scheduleContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your optimal study schedule...</p>
+                </div>
+            `;
+            switchTab('schedule');
+
+            try {
+                const response = await fetch(`${API_URL}/api/schedule/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        calendar_events: calendarEvents,
+                        assignments: assignments,
+                        activities: activities,
+                        preferences: preferences
+                    })
+                });
+
+                const data = await response.json();
+                currentSchedule = data.schedule;
+                displaySchedule(currentSchedule);
+            } catch (error) {
+                scheduleContent.innerHTML = `
+                    <div class="alert alert-error">
+                        ✗ Failed to generate schedule: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Display Schedule
+        function displaySchedule(schedule) {
+            const scheduleContent = document.getElementById('scheduleContent');
+            
+            scheduleContent.innerHTML = `
+                <div class="card">
+                    <div class="calendar-controls">
+                        <div class="view-switcher">
+                            <button class="view-btn ${currentView === 'day' ? 'active' : ''}" onclick="setView('day')">Day</button>
+                            <button class="view-btn ${currentView === 'week' ? 'active' : ''}" onclick="setView('week')">Week</button>
+                            <button class="view-btn ${currentView === 'month' ? 'active' : ''}" onclick="setView('month')">Month</button>
+                        </div>
+                        <div class="calendar-nav">
+                            <button class="btn btn-outline" onclick="navigateCalendar(-1)">← Previous</button>
+                            <div class="calendar-title" id="calendarTitle"></div>
+                            <button class="btn btn-outline" onclick="navigateCalendar(1)">Next →</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="exportSchedule()">Download .ics</button>
+                    </div>
+                    <div id="calendar" class="calendar-grid"></div>
+                </div>
+            `;
+            
+            updateCalendar();
+        }
+
+        function setView(view) {
+            currentView = view;
+            updateCalendar();
+        }
+
+        function navigateCalendar(direction) {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + direction);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() + (direction * 7));
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + direction);
+            }
+            updateCalendar();
+        }
+
+        function updateCalendar() {
+            const calendar = document.getElementById('calendar');
+            const title = document.getElementById('calendarTitle');
+            if (!calendar || !title) return;
+
+            // Combine all events
+            const allEvents = [
+                ...calendarEvents.map(e => ({ ...e, type: 'calendar' })),
+                ...currentSchedule.map(e => ({ ...e, summary: e.name, type: e.type || 'study' }))
+            ];
+
+            if (currentView === 'week') {
+                displayWeekView(calendar, title, allEvents);
+            } else if (currentView === 'day') {
+                displayDayView(calendar, title, allEvents);
+            } else {
+                displayMonthView(calendar, title, allEvents);
+            }
+        }
+
+        function displayWeekView(calendar, title, events) {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            
+            title.textContent = `Week of ${startOfWeek.toLocaleDateString()}`;
+            
+            calendar.className = 'calendar-grid calendar-week-view';
+            
+            let html = '<div class="calendar-header"></div>';
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach((day, i) => {
+                const date = new Date(startOfWeek);
+                date.setDate(date.getDate() + i);
+                html += `<div class="calendar-header">${day}<br>${date.getDate()}</div>`;
+            });
+            
+            // Generate hourly rows
+            for (let hour = 0; hour < 24; hour++) {
+                html += `<div class="time-label">${hour.toString().padStart(2, '0')}:00</div>`;
+                
+                for (let day = 0; day < 7; day++) {
+                    const cellDate = new Date(startOfWeek);
+                    cellDate.setDate(cellDate.getDate() + day);
+                    cellDate.setHours(hour, 0, 0, 0);
                     
-                    <div class="filters">
-                        <button class="filter-btn active" data-filter="incomplete">Active</button>
-                        <button class="filter-btn" data-filter="completed">Completed</button>
-                        <button class="filter-btn" data-filter="all">All</button>
-                    </div>
+                    const cellEvents = events.filter(e => {
+                        const start = new Date(e.start);
+                        return start.getDate() === cellDate.getDate() &&
+                               start.getMonth() === cellDate.getMonth() &&
+                               start.getHours() === hour;
+                    });
                     
-                    <div id="assignmentsList" class="items-list"></div>
+                    let cellHtml = '<div class="calendar-cell">';
+                    cellEvents.forEach(e => {
+                        const className = e.type === 'study' ? 'study-block' : 
+                                        e.type === 'activity' ? 'activity' : '';
+                        cellHtml += `<div class="event ${className}">${e.summary || e.name}</div>`;
+                    });
+                    cellHtml += '</div>';
+                    html += cellHtml;
+                }
+            }
+            
+            calendar.innerHTML = html;
+        }
+
+        function displayDayView(calendar, title, events) {
+            title.textContent = currentDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            calendar.className = 'calendar-grid calendar-day-view';
+            
+            let html = '<div class="calendar-header">Time</div><div class="calendar-header">Events</div>';
+            
+            for (let hour = 0; hour < 24; hour++) {
+                html += `<div class="time-label">${hour.toString().padStart(2, '0')}:00</div>`;
+                
+                const cellDate = new Date(currentDate);
+                cellDate.setHours(hour, 0, 0, 0);
+                
+                const cellEvents = events.filter(e => {
+                    const start = new Date(e.start);
+                    return start.getDate() === cellDate.getDate() &&
+                           start.getMonth() === cellDate.getMonth() &&
+                           start.getHours() === hour;
+                });
+                
+                let cellHtml = '<div class="calendar-cell">';
+                cellEvents.forEach(e => {
+                    const className = e.type === 'study' ? 'study-block' : 
+                                    e.type === 'activity' ? 'activity' : '';
+                    cellHtml += `<div class="event ${className}">${e.summary || e.name}</div>`;
+                });
+                cellHtml += '</div>';
+                html += cellHtml;
+            }
+            
+            calendar.innerHTML = html;
+        }
+
+        function displayMonthView(calendar, title, events) {
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            title.textContent = currentDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+            
+            calendar.className = 'calendar-grid calendar-month-view';
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            let html = days.map(day => `<div class="calendar-header">${day}</div>`).join('');
+            
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startDay; i++) {
+                html += '<div class="calendar-cell"></div>';
+            }
+            
+            // Add cells for each day of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                
+                const cellEvents = events.filter(e => {
+                    const start = new Date(e.start);
+                    return start.getDate() === day &&
+                           start.getMonth() === currentDate.getMonth() &&
+                           start.getFullYear() === currentDate.getFullYear();
+                });
+                
+                let cellHtml = `<div class="calendar-cell"><strong>${day}</strong><br>`;
+                cellEvents.slice(0, 3).forEach(e => {
+                    const className = e.type === 'study' ? 'study-block' : 
+                                    e.type === 'activity' ? 'activity' : '';
+                    cellHtml += `<div class="event ${className}">${e.summary || e.name}</div>`;
+                });
+                if (cellEvents.length > 3) {
+                    cellHtml += `<div style="font-size: 0.75rem; color: var(--gray-medium);">+${cellEvents.length - 3} more</div>`;
+                }
+                cellHtml += '</div>';
+                html += cellHtml;
+            }
+            
+            calendar.innerHTML = html;
+        }
+
+        // Export Schedule
+        async function exportSchedule() {
+            try {
+                const response = await fetch(`${API_URL}/api/schedule/export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ schedule: currentSchedule })
+                });
+
+                const data = await response.json();
+                
+                // Download file
+                const blob = new Blob([data.ical_content], { type: 'text/calendar' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'study-schedule.ics';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Failed to export schedule: ' + error.message);
+            }
+        }
+
+        // Adjust Schedule
+        async function handleAdjustCalendarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const content = e.target.result;
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/calendar/parse`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ical_content: content })
+                    });
+
+                    const data = await response.json();
+                    calendarEvents = data.events;
+
+                    const status = document.getElementById('adjustCalendarStatus');
+                    status.className = 'alert alert-success';
+                    status.innerHTML = `✓ Imported ${calendarEvents.length} updated events`;
+                    status.classList.remove('hidden');
+                } catch (error) {
+                    showError('Failed to parse calendar: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function adjustSchedule() {
+            if (!currentSchedule || currentSchedule.length === 0) {
+                alert('Please generate a schedule first');
+                return;
+            }
+
+            const preferences = {
+                wake_time: document.getElementById('wakeTime').value,
+                bed_time: document.getElementById('bedTime').value
+            };
+
+            // Show loading
+            const adjustedContent = document.getElementById('adjustedScheduleContent');
+            adjustedContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Adjusting your schedule...</p>
                 </div>
+            `;
 
-                <!-- Classes View -->
-                <div id="scheduleView" class="view">
-                    <div class="view-header">
-                        <div>
-                            <h2>Class Schedule</h2>
-                            <p class="view-subtitle">Your recurring weekly classes</p>
-                        </div>
-                        <button id="addClassBtn" class="btn btn-primary">+ Add Class</button>
+            try {
+                const response = await fetch(`${API_URL}/api/schedule/adjust`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        existing_schedule: currentSchedule,
+                        calendar_events: calendarEvents,
+                        assignments: assignments,
+                        preferences: preferences
+                    })
+                });
+
+                const data = await response.json();
+                currentSchedule = data.schedule;
+                
+                adjustedContent.innerHTML = `
+                    <div class="alert alert-success">
+                        ✓ Schedule adjusted successfully!
                     </div>
-                    <div id="classesList" class="items-list"></div>
-                </div>
-
-                <!-- Meetings View -->
-                <div id="meetingsView" class="view">
-                    <div class="view-header">
-                        <div>
-                            <h2>Meetings</h2>
-                            <p class="view-subtitle">Your scheduled meetings</p>
-                        </div>
-                        <button id="addMeetingBtn" class="btn btn-primary">+ New Meeting</button>
+                `;
+                
+                switchTab('schedule');
+                displaySchedule(currentSchedule);
+            } catch (error) {
+                adjustedContent.innerHTML = `
+                    <div class="alert alert-error">
+                        ✗ Failed to adjust schedule: ${error.message}
                     </div>
-                    
-                    <div class="meeting-link-card">
-                        <h3>📎 Your Meeting Link</h3>
-                        <p>Share this link for others to schedule meetings with you:</p>
-                        <div class="link-display">
-                            <input type="text" id="meetingLink" readonly>
-                            <button id="copyLinkBtn" class="btn btn-secondary">Copy</button>
-                        </div>
-                    </div>
-                    
-                    <div id="meetingsList" class="items-list"></div>
-                </div>
+                `;
+            }
+        }
 
-                <!-- Study Blocks View -->
-                <div id="studyBlocksView" class="view">
-                    <div class="view-header">
-                        <div>
-                            <h2>Study Blocks</h2>
-                            <p class="view-subtitle">Auto-generated study schedule</p>
-                        </div>
-                        <button id="regenerateBtn" class="btn btn-primary">🔄 Regenerate Schedule</button>
-                    </div>
-                    <div id="studyBlocksList" class="items-list"></div>
-                </div>
-
-                <!-- Settings View -->
-                <div id="settingsView" class="view">
-                    <div class="view-header">
-                        <h2>Settings</h2>
-                        <p class="view-subtitle">Customize your scheduling preferences</p>
-                    </div>
-                    
-                    <form id="settingsForm" class="settings-form">
-                        <div class="form-group">
-                            <label for="wakeTime">Wake Time</label>
-                            <input type="time" id="wakeTime" name="wakeTime">
-                            <small>When you typically wake up</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bedTime">Bedtime</label>
-                            <input type="time" id="bedTime" name="bedTime">
-                            <small>When you typically go to bed</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="studyBlockDuration">Study Block Duration (minutes)</label>
-                            <input type="number" id="studyBlockDuration" name="studyBlockDuration" min="30" max="240" step="15">
-                            <small>Maximum length for a single study session</small>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Save Preferences</button>
-                    </form>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Modal for Adding/Editing Items -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h2 id="modalTitle">Add Item</h2>
-            <div id="modalBody"></div>
-        </div>
-    </div>
-
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-indicator">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Scripts -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    <script src="app.js"></script>
+        function showError(message) {
+            const status = document.getElementById('calendarStatus');
+            status.className = 'alert alert-error';
+            status.innerHTML = `✗ ${message}`;
+            status.classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
