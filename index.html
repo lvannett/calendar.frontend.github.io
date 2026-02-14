@@ -1125,22 +1125,40 @@
             if (!calendar || !title) return;
 
             // Combine all events with proper parsing
-            const allEvents = [
-                ...calendarEvents.map(e => ({
-                    ...e,
-                    start: new Date(e.start),
-                    end: new Date(e.end),
-                    type: 'calendar',
-                    summary: e.summary
-                })),
-                ...currentSchedule.map(e => ({
-                    ...e,
-                    start: new Date(e.start),
-                    end: new Date(e.end),
-                    type: e.type || 'study',
-                    summary: e.name
-                }))
-            ];
+            const allEvents = [];
+            
+            // Add calendar events
+            calendarEvents.forEach(e => {
+                try {
+                    allEvents.push({
+                        start: new Date(e.start),
+                        end: new Date(e.end),
+                        type: 'calendar',
+                        summary: e.summary || 'Calendar Event'
+                    });
+                } catch (err) {
+                    console.error('Error parsing calendar event:', e, err);
+                }
+            });
+            
+            // Add study blocks
+            currentSchedule.forEach(e => {
+                try {
+                    allEvents.push({
+                        start: new Date(e.start),
+                        end: new Date(e.end),
+                        type: e.type || 'study',
+                        summary: e.name || e.summary || 'Study Block'
+                    });
+                } catch (err) {
+                    console.error('Error parsing study block:', e, err);
+                }
+            });
+            
+            console.log('Total events to display:', allEvents.length);
+            console.log('Calendar events:', calendarEvents.length);
+            console.log('Study blocks:', currentSchedule.length);
+            console.log('Sample events:', allEvents.slice(0, 5));
 
             if (currentView === 'week') {
                 displayWeekView(calendar, title, allEvents);
@@ -1193,7 +1211,13 @@
                     
                     // Find events that overlap with this hour
                     const cellEvents = events.filter(e => {
-                        return e.start < cellEndDate && e.end > cellDate;
+                        // Event overlaps if: event starts before cell ends AND event ends after cell starts
+                        const eventStart = e.start.getTime();
+                        const eventEnd = e.end.getTime();
+                        const cellStart = cellDate.getTime();
+                        const cellEnd = cellEndDate.getTime();
+                        
+                        return eventStart < cellEnd && eventEnd > cellStart;
                     });
                     
                     html += '<div class="day-cell">';
@@ -1251,7 +1275,13 @@
                 cellEndDate.setHours(hour + 1, 0, 0, 0);
                 
                 const cellEvents = events.filter(e => {
-                    return e.start < cellEndDate && e.end > cellDate;
+                    // Event overlaps if: event starts before cell ends AND event ends after cell starts
+                    const eventStart = e.start.getTime();
+                    const eventEnd = e.end.getTime();
+                    const cellStart = cellDate.getTime();
+                    const cellEnd = cellEndDate.getTime();
+                    
+                    return eventStart < cellEnd && eventEnd > cellStart;
                 });
                 
                 html += '<div class="day-cell">';
@@ -1309,9 +1339,10 @@
                 const isToday = cellDate.toDateString() === today.toDateString();
                 
                 const cellEvents = events.filter(e => {
-                    return e.start.getDate() === day &&
-                           e.start.getMonth() === currentDate.getMonth() &&
-                           e.start.getFullYear() === currentDate.getFullYear();
+                    const eventDate = e.start;
+                    return eventDate.getDate() === day &&
+                           eventDate.getMonth() === currentDate.getMonth() &&
+                           eventDate.getFullYear() === currentDate.getFullYear();
                 });
                 
                 html += `
