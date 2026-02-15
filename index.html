@@ -1388,8 +1388,8 @@
                 
                 html += '<div class="day-cell">';
                 cellEvents.forEach(e => {
-                    const className = e.type === 'study' ? 'study-block' : 
-                                    e.type === 'activity' ? 'activity' : '';
+                    const className = e.type === 'study' || e.type === 'assignment' ? 'study-block' : 
+                                        e.type === 'activity' ? 'activity' : '';
                     const startTime = e.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                     const endTime = e.end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                     
@@ -1453,8 +1453,8 @@
                 `;
                 
                 cellEvents.slice(0, 3).forEach(e => {
-                    const className = e.type === 'study' ? 'study-block' : 
-                                    e.type === 'activity' ? 'activity' : '';
+                    const className = e.type === 'study' || e.type === 'assignment' ? 'study-block' : 
+                                        e.type === 'activity' ? 'activity' : '';
                     const timeStr = e.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                     html += `
                         <div class="month-event ${className}" title="${e.summary} at ${timeStr}">
