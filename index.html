@@ -791,8 +791,11 @@
 
             <!-- Generate Schedule -->
             <div class="card">
-                <button class="btn btn-primary" onclick="generateSchedule()" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1.125rem;">
+                <button class="btn btn-primary" onclick="generateSchedule()" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1.125rem; margin-bottom: 1rem;">
                     🎯 Generate Schedule
+                </button>
+                <button class="btn btn-secondary" onclick="loadTestSchedule()" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.9rem;">
+                    🧪 Load Test Schedule (for debugging)
                 </button>
             </div>
         </div>
@@ -1045,6 +1048,12 @@
             switchTab('schedule');
 
             try {
+                console.log('Sending to backend:', {
+                    calendar_events: calendarEvents.length,
+                    assignments: assignments.length,
+                    activities: activities.length
+                });
+                
                 const response = await fetch(`${API_URL}/api/schedule/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1056,13 +1065,90 @@
                     })
                 });
 
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to generate schedule');
+                }
+
                 const data = await response.json();
+                console.log('Received from backend:', data);
+                
+                if (!data.schedule || data.schedule.length === 0) {
+                    scheduleContent.innerHTML = `
+                        <div class="alert alert-error">
+                            ✗ No study blocks were generated. This might mean:
+                            <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                <li>Your calendar is too full (no free time)</li>
+                                <li>Due dates are too soon</li>
+                                <li>Check the browser console (F12) for errors</li>
+                            </ul>
+                            <button class="btn btn-secondary" onclick="loadTestSchedule()" style="margin-top: 1rem;">
+                                Try Test Schedule to verify calendar display works
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 currentSchedule = data.schedule;
+                console.log('Study blocks received:', currentSchedule.length);
                 displaySchedule(currentSchedule);
             } catch (error) {
+                console.error('Generate schedule error:', error);
                 scheduleContent.innerHTML = `
                     <div class="alert alert-error">
                         ✗ Failed to generate schedule: ${error.message}
+                        <br><br>
+                        <strong>Debug info:</strong>
+                        <br>• Check that your backend URL is correct
+                        <br>• Open browser console (F12) to see full error
+                        <br>• Check Render logs for backend errors
+                        <br><br>
+                        <button class="btn btn-secondary" onclick="loadTestSchedule()">
+                            Try Test Schedule
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Load test schedule for debugging
+        async function loadTestSchedule() {
+            const scheduleContent = document.getElementById('scheduleContent');
+            scheduleContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading test schedule...</p>
+                </div>
+            `;
+            switchTab('schedule');
+
+            try {
+                console.log('Loading test schedule from:', `${API_URL}/api/test/schedule`);
+                
+                const response = await fetch(`${API_URL}/api/test/schedule`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load test schedule');
+                }
+
+                const data = await response.json();
+                console.log('Test schedule received:', data);
+                
+                currentSchedule = data.schedule;
+                displaySchedule(currentSchedule);
+                
+                alert(`✓ Loaded ${data.count} test study blocks. If you can see them on the calendar, the display is working!`);
+            } catch (error) {
+                console.error('Test schedule error:', error);
+                scheduleContent.innerHTML = `
+                    <div class="alert alert-error">
+                        ✗ Failed to load test schedule: ${error.message}
+                        <br><br>
+                        This means your backend isn't reachable. Check:
+                        <br>• API_URL in index.html (currently: ${API_URL})
+                        <br>• Visit ${API_URL}/api/health in your browser
+                        <br>• Check Render deployment status
                     </div>
                 `;
             }
@@ -1177,6 +1263,16 @@
             const endOfWeek = new Date(startOfWeek);
             endOfWeek.setDate(endOfWeek.getDate() + 6);
             
+            console.log('Week view:', startOfWeek.toISOString(), 'to', endOfWeek.toISOString());
+            console.log('Events to display:', events.length);
+            
+            if (events.length > 0) {
+                console.log('Sample event dates:');
+                events.slice(0, 3).forEach(e => {
+                    console.log(' -', e.summary, ':', e.start.toISOString());
+                });
+            }
+            
             title.textContent = `${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
             
             calendar.className = 'calendar-grid-container week-view';
@@ -1196,6 +1292,8 @@
                 `;
             }
             html += '</div>';
+            
+            let totalEventsFound = 0;
             
             // Generate hourly rows
             for (let hour = 0; hour < 24; hour++) {
@@ -1220,9 +1318,11 @@
                         return eventStart < cellEnd && eventEnd > cellStart;
                     });
                     
+                    totalEventsFound += cellEvents.length;
+                    
                     html += '<div class="day-cell">';
                     cellEvents.forEach(e => {
-                        const className = e.type === 'study' ? 'study-block' : 
+                        const className = e.type === 'study' || e.type === 'assignment' ? 'study-block' : 
                                         e.type === 'activity' ? 'activity' : '';
                         const startTime = e.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                         const endTime = e.end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -1237,6 +1337,8 @@
                     html += '</div>';
                 }
             }
+            
+            console.log('Week view: placed', totalEventsFound, 'event instances in cells');
             
             html += '</div>';
             calendar.innerHTML = html;
@@ -1390,6 +1492,13 @@
 
         // Export Schedule
         async function exportSchedule() {
+            if (!currentSchedule || currentSchedule.length === 0) {
+                alert('No schedule to export! Generate a schedule first.');
+                return;
+            }
+            
+            console.log('Exporting schedule:', currentSchedule);
+            
             try {
                 const response = await fetch(`${API_URL}/api/schedule/export`, {
                     method: 'POST',
@@ -1397,7 +1506,17 @@
                     body: JSON.stringify({ schedule: currentSchedule })
                 });
 
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
                 const data = await response.json();
+                
+                if (!data.ical_content) {
+                    throw new Error('No calendar data received');
+                }
+                
+                console.log('Received iCal data, length:', data.ical_content.length);
                 
                 // Download file
                 const blob = new Blob([data.ical_content], { type: 'text/calendar' });
@@ -1409,7 +1528,10 @@
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
+                
+                alert(`✓ Exported ${currentSchedule.length} study blocks to study-schedule.ics`);
             } catch (error) {
+                console.error('Export error:', error);
                 alert('Failed to export schedule: ' + error.message);
             }
         }
